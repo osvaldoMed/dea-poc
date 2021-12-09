@@ -12,14 +12,15 @@ BOT_NAME = 'splash_dea'
 SPIDER_MODULES = ['splash_dea.spiders']
 NEWSPIDER_MODULE = 'splash_dea.spiders'
 
-SPLASH_URL = 'http://192.168.59.103:8050'
+
+SPLASH_URL = 'http://127.0.0.1:8050/'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'splash_dea (+http://www.yourdomain.com)'
 
 # Obey robots.txt rules
-ROBOTSTXT_OBEY = True
+ROBOTSTXT_OBEY = False
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32
@@ -47,20 +48,20 @@ ROBOTSTXT_OBEY = True
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 SPIDER_MIDDLEWARES = {
-    'splash_dea.SplashDeduplicateArgsMiddleware': 100,
+    'scrapy_splash.SplashDeduplicateArgsMiddleware': 100,
    #'splash_dea.middlewares.SplashDeaSpiderMiddleware': 543,
 }
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-    'splash_dea.SplashCookiesMiddleware': 723,
-    'splash_dea.SplashMiddleware': 725,
+    'scrapy_splash.SplashCookiesMiddleware': 723,
+    'scrapy_splash.SplashMiddleware': 725,
     'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
 }
 
 # Set a custom DUPEFILTER_CLASS
-DUPEFILTER_CLASS = 'splash_dea.SplashAwareDupeFiler'
+DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html
@@ -93,4 +94,4 @@ DUPEFILTER_CLASS = 'splash_dea.SplashAwareDupeFiler'
 #HTTPCACHE_EXPIRATION_SECS = 0
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
-HTTPCACHE_STORAGE = 'splash_dea.SplashAwareFSCacheStorage'
+HTTPCACHE_STORAGE = 'scrapy_splash.SplashAwareFSCacheStorage'
