@@ -32,3 +32,8 @@ Open Notebook at request-dea and execute cell by cell
 
 ### Run Selenium implementation.
 Open Notebook at selenium-dea and execute cell by cell. Note, you have to wait for each page to fully load before executing the next cell.
+
+## Scrapy-Splash implementation.
+
+We need to run a docker container with the splash server
+> docker run -p 8050:8050 scrapinghub/splash --max-timeout 200

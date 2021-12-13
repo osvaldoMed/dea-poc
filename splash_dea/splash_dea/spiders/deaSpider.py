@@ -8,74 +8,88 @@ from scrapy.utils.response import open_in_browser
 
 class DEASpider(scrapy.Spider):
     name = 'dea'
+    user_agent = 'Mozilla/5.0'
 
     def start_requests(self):
-        splash_args = {
-            'html': 1,
-            'png': 1,
-            'width': 600,
-            'timeout':50,
-            'wait': 0.,
-        }
-        request = SplashRequest(url='https://apps.deadiversion.usdoj.gov/webforms2/spring/validationLogin',
-                                callback=self.login_1,
-                                method='GET',
-                                endpoint='render.json',
-                                magic_response=True,
-                                args=splash_args,
-                                dont_filter=True,
-                                )
-        request.meta['splash']['session_id'] = 1
+        script = """
+            function main(splash, args)
+            splash:go(args.url)
+
+            return {
+                html = splash:html(),
+                png = splash:png(),
+                cookies = splash:get_cookies(),
+                }
+            end"""
+
+        url = 'https://apps.deadiversion.usdoj.gov/webforms2/spring/validationLogin?execution=e1s1'
+        request = SplashRequest(
+            url=url,
+            callback=self.login_1,
+            endpoint='execute',
+            session_id=1,
+            args={'lua_source': script},
+        )
         self.logger.info(f'INITIAL REQUEST at {request.url}')
+        self.logger.info(f'INITIAL REQUEST splash args: {request.meta["splash"]}')
+
     
         return [request]
 
 
     def login_1(self, response):
-        #open_in_browser(response)
-        self.logger.info(f'GENERATING login_1 response pnG.')
+        self.logger.info(f'RECEIVED start_request response')
+        self.logger.info(f'COOKIES in start_request response: {response.data["cookies"]}')
+        self.logger.info(f'HEADERS in start_request response: {response.headers}')
+
+        self.logger.info(f'GENERATING start_request response png.')
         imgdata = base64.b64decode(response.data['png'])
         filename = './img/dea_01.png'
 
         with open(filename, 'wb') as f:
             f.write(imgdata)
 
+        self.logger.info(f'SAVED start_request response png to {filename}')
 
-        self.logger.info(f'SAVED login_1 response png to {filename}')
 
-        splash_args = {
-            'html': 1,
-            'png': 1,
-            'width': 600,
-            'timeout':50,
-            'wait': 0,
-        }
+        script = """
+            function main(splash, args)
+            splash:init_cookies(splash.args.cookies)
+            splash:go(splash.args.url)
+
+            return {
+                html = splash:html(),
+                png = splash:png(),
+                cookies = splash:get_cookies(),
+                }
+            end"""
 
         formdata = {'pform:deaNumber':'FE9093028'}
-        formRequest = SplashFormRequest.from_response(
-            response=response,
+        formRequest = SplashFormRequest(
+            url=response.url,
             formdata=formdata,
             callback=self.login_2,
-            endpoint='render.json',
-            args=splash_args,
+            endpoint='execute',
+            session_id=1,
+            args={'lua_source': script, 'cookies': response.data['cookies'], 'wait': 10.},
             dont_filter=True,
         )
-        formRequest.meta['splash']['session_id'] = 1
-        self.logger.info(f'SENDING FIRST LOGIN REQUEST with {formdata} \n to {formRequest.url}')
+        self.logger.info(f'SENDING login_1 REQUEST with \n formdata:{formdata} \n to {formRequest.url} \n and args:{formRequest.meta["splash"]["args"]}')
 
         yield formRequest
 
 
 
     def login_2(self, response):
-        self.logger.info(f'RECEIVED FIRST LOGIN RESPONSE')
-        self.logger.info(f'GENERATING login_2 response png.')
+        self.logger.info(f'RECEIVED login_1 response')
+        self.logger.info(f'COOKIES in login_1 response: {response.data["cookies"]}')
+
+        self.logger.info(f'GENERATING login_1 response png.')
         imgdata = base64.b64decode(response.data['png'])
         filename = './img/dea_02.png'
         with open(filename, 'wb') as f:
             f.write(imgdata)
 
-        
         self.logger.info(f'SAVED login_2 response png to {filename}')
         
     #     open_in_browser(response)\n to {formRequest.url}
