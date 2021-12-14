@@ -13,16 +13,35 @@ class DEASpider(scrapy.Spider):
     def start_requests(self):
         script = """
             function main(splash, args)
-            splash:go(args.url)
+
+            function focus(sel)
+                splash:select(sel):focus()
+            end
+            assert(splash:go(args.url))
+            assert(splash:wait(1))
+            local png_0 = splash:png()
+
+            local deaNumberInput = assert(splash:select('#pform\\\\:deaNumber'))
+            ok, reason = deaNumberInput:mouse_hover()
+            assert(splash:wait(0.5))
+            local png_1 = splash:png()
+
+            focus('#pform\\\\:deaNumber')
+            splash:send_text(splash.args.deaNumber)
+            assert(splash:wait(0.5))
+            local png_2 = splash:png()
+
 
             local entries = splash:history()
             local last_response = entries[#entries].response
 
             return {
                 html = splash:html(),
-                png = splash:png(),
                 cookies = splash:get_cookies(),
                 headers = last_response.headers,
+                png_0 = png_0,
+                png_1 = png_1,
+                png_2 = png_2,
                 }
             end"""
 
@@ -51,7 +70,7 @@ class DEASpider(scrapy.Spider):
             callback=self.login_1,
             endpoint='execute',
             session_id=1,
-            args={'lua_source': script, 'wait':20.},
+            args={'lua_source': script, 'deaNumber': 'FE9093028'},
         )
         self.logger.info(f'INITIAL REQUEST to {request.url}')
         self.logger.info(f'INITIAL REQUEST HEADERS:  {request.headers}')
@@ -66,57 +85,65 @@ class DEASpider(scrapy.Spider):
         self.logger.info(f'RECEIVED start_request response')
         self.logger.info(f'COOKIES in start_request response: {cookies}')
         self.logger.info(f'HEADERS in start_request response: {headers}')
-        self.logger.info(f'HTML in start_request response: {html}')
+
+        png_list = [
+            response.data['png_0'],
+            response.data['png_1'],
+            response.data['png_2'],
+            #response.data['png']
+        ]
+
+        for i, png in enumerate(png_list):
+            self.logger.info(f'GENERATING start_request response png_{i:02d}')
+            imgdata = base64.b64decode(png)
+            filename = f'./img/dea_{i:02d}.png'
+
+            with open(filename, 'wb') as f:
+                f.write(imgdata)
 
 
-        self.logger.info(f'GENERATING start_request response png.')
-        imgdata = base64.b64decode(response.data['png'])
-        filename = './img/dea_01.png'
-
-        with open(filename, 'wb') as f:
-            f.write(imgdata)
 
     #     self.logger.info(f'SAVED start_request response png to {filename}')
 
-        script = """
-            function main(splash, args)
-            splash:init_cookies(splash.args.cookies)
-            splash:go(splash.args.url)
+        # script = """
+        #     function main(splash, args)
+        #     splash:init_cookies(splash.args.cookies)
+        #     splash:go(splash.args.url)
 
-            local entries = splash:history()
-            local last_response = entries[#entries].response
+        #     local entries = splash:history()
+        #     local last_response = entries[#entries].response
 
-            return {
-                html = splash:html(),
-                png = splash:png(),
-                cookies = splash:get_cookies(),
-                headers = last_response.headers,
-                }
-            end"""
+        #     return {
+        #         html = splash:html(),
+        #         png = splash:png(),
+        #         cookies = splash:get_cookies(),
+        #         headers = last_response.headers,
+        #         }
+        #     end"""
 
-        url = 'https://apps.deadiversion.usdoj.gov/webforms2/spring/validationLogin?execution=e2s1'
-        formdata = {
-            'pform': 'pform',
-            'pform:deaNumber':'FE9093028',
-            'pform:validateDeaNumber': '',
-            'javax.faces.ViewState': 'e2s1',
-        }
+        # url = 'https://apps.deadiversion.usdoj.gov/webforms2/spring/validationLogin?execution=e2s1'
+        # formdata = {
+        #     'pform': 'pform',
+        #     'pform:deaNumber':'FE9093028',
+        #     'pform:validateDeaNumber': '',
+        #     'javax.faces.ViewState': 'e2s1',
+        # }
 
-        request = SplashFormRequest(
-            url=url,
-            callback=self.login_2,
-            formdata=formdata,
-            endpoint='execute',
-            session_id=1,
-            args={'lua_source': script, 'cookies': cookies, 'wait':20.},
-        )
+        # request = SplashFormRequest(
+        #     url=url,
+        #     callback=self.login_2,
+        #     formdata=formdata,
+        #     endpoint='execute',
+        #     session_id=1,
+        #     args={'lua_source': script, 'cookies': cookies, 'wait':20.},
+        # )
 
 
-        self.logger.info(f'login_1 REQUEST to {request.url}')
-        self.logger.info(f'login_1 REQUEST HEADERS:  {request.headers}')
-        self.logger.info(f'login_1 REQUEST splash args: {request.meta["splash"]}')
+        # self.logger.info(f'login_1 REQUEST to {request.url}')
+        # self.logger.info(f'login_1 REQUEST HEADERS:  {request.headers}')
+        # self.logger.info(f'login_1 REQUEST splash args: {request.meta["splash"]}')
 
-        return request
+        # return request
 
     #     self.logger.info(f'GENERATING start_request response png.')
     #     imgdata = base64.b64decode(response.data['png'])
@@ -158,24 +185,24 @@ class DEASpider(scrapy.Spider):
 
 
 
-    def login_2(self, response):
-        cookies = response.data['cookies']
-        headers = response.data['headers']
-        html = response.data['html']
-        self.logger.info(f'RECEIVED login_1 response')
-        self.logger.info(f'COOKIES in login_1 response: {cookies}')
-        self.logger.info(f'HEADERS in login_1 response: {headers}')
-        self.logger.info(f'HTML in login_1 response: {html}')
+    # def login_2(self, response):
+    #     cookies = response.data['cookies']
+    #     headers = response.data['headers']
+    #     html = response.data['html']
     #     self.logger.info(f'RECEIVED login_1 response')
-    #     self.logger.info(f'COOKIES in login_1 response: {response.data["cookies"]}')
+    #     self.logger.info(f'COOKIES in login_1 response: {cookies}')
+    #     self.logger.info(f'HEADERS in login_1 response: {headers}')
+    #     self.logger.info(f'HTML in login_1 response: {html}')
+    # #     self.logger.info(f'RECEIVED login_1 response')
+    # #     self.logger.info(f'COOKIES in login_1 response: {response.data["cookies"]}')
 
-        self.logger.info(f'GENERATING login_1 response png.')
-        imgdata = base64.b64decode(response.data['png'])
-        filename = './img/dea_02.png'
-        with open(filename, 'wb') as f:
-            f.write(imgdata)
+    #     self.logger.info(f'GENERATING login_1 response png.')
+    #     imgdata = base64.b64decode(response.data['png'])
+    #     filename = './img/dea_02.png'
+    #     with open(filename, 'wb') as f:
+    #         f.write(imgdata)
 
-        self.logger.info(f'SAVED login_2 response png to {filename}')
+    #     self.logger.info(f'SAVED login_2 response png to {filename}')
         
     #     open_in_browser(response)\n to {formRequest.url}
 
