@@ -13,57 +13,49 @@ class DEASpider(scrapy.Spider):
     def start_requests(self):
         script = """
             function main(splash, args)
+                -- function to select given element and focus it. accepts css selector
+                function focus(sel)
+                    splash:select(sel):focus()
+                end
 
-            function focus(sel)
-                splash:select(sel):focus()
-            end
-            assert(splash:go(args.url))
-            assert(splash:wait(1))
-            local png_0 = splash:png()
+                -- Go to DEA website and wait to load
+                assert(splash:go(args.url))
+                assert(splash:wait(1))
+                local png_0 = splash:png()
 
-            local deaNumberInput = assert(splash:select('#pform\\\\:deaNumber'))
-            ok, reason = deaNumberInput:mouse_hover()
-            assert(splash:wait(0.5))
-            local png_1 = splash:png()
+                -- Make sure input is available and hover mouse over it
+                local deaNumberInput = assert(splash:select('#pform\\\\:deaNumber'))
+                ok, reason = deaNumberInput:mouse_hover()
+                assert(splash:wait(0.5))
+                local png_1 = splash:png()
 
-            focus('#pform\\\\:deaNumber')
-            splash:send_text(splash.args.deaNumber)
-            assert(splash:wait(0.5))
-            local png_2 = splash:png()
+                -- Focus input field and fill it with dea number
+                focus('#pform\\\\:deaNumber')
+                splash:send_text(splash.args.deaNumber)
+                assert(splash:wait(0.5))
+                local png_2 = splash:png()
+
+                -- Select NEXT button and click it with
+                splash:select('#pform\\\\:validateDeaNumberButton'):mouse_click()
+                assert(splash:wait(5))
+                local png_3 = splash:png()
 
 
-            local entries = splash:history()
-            local last_response = entries[#entries].response
+                local entries = splash:history()
+                local last_response = entries[#entries].response
 
-            return {
-                html = splash:html(),
-                cookies = splash:get_cookies(),
-                headers = last_response.headers,
-                png_0 = png_0,
-                png_1 = png_1,
-                png_2 = png_2,
-                }
+                return {
+                    html = splash:html(),
+                    cookies = splash:get_cookies(),
+                    headers = last_response.headers,
+                    png_0 = png_0,
+                    png_1 = png_1,
+                    png_2 = png_2,
+                    png_3 = png_3,
+                    }
             end"""
 
         url = 'https://apps.deadiversion.usdoj.gov/webforms2/spring/validationLogin'
-        headers_0 = {
-            'Host': 'apps.deadiversion.usdoj.gov',
-            'Connection': 'keep-alive',
-            'Pragma': 'no-cache',
-            'Cache-Control': 'no-cache',
-            'sec-ch-ua': '" Not A;Brand";v="99", "Chromium";v="96", "Google Chrome";v="96"',
-            'sec-ch-ua-mobile': '?0',
-            'sec-ch-ua-platform': "Linux",
-            'Upgrade-Insecure-Requests': '1',
-            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-            'Sec-Fetch-Site': 'none',
-            'Sec-Fetch-Mode': 'navigate',
-            'Sec-Fetch-User': '?1',
-            'Sec-Fetch-Dest': 'document',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'Accept-Language': 'en-US,en;q=0.9',
-        }
 
         request = SplashRequest(
             url=url,
@@ -90,7 +82,7 @@ class DEASpider(scrapy.Spider):
             response.data['png_0'],
             response.data['png_1'],
             response.data['png_2'],
-            #response.data['png']
+            response.data['png_3']
         ]
 
         for i, png in enumerate(png_list):
