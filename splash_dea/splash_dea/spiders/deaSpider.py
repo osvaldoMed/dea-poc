@@ -18,6 +18,8 @@ class DEASpider(scrapy.Spider):
                     splash:select(sel):focus()
                 end
 
+                pngTable = {}
+
                 -- Go to DEA website and wait to load
                 assert(splash:go(args.url))
                 assert(splash:wait(1))
@@ -26,12 +28,12 @@ class DEASpider(scrapy.Spider):
                 focus('#pform\\\\:deaNumber')
                 splash:send_text('FE9093028')   -- <========== DEA NUMBER
                 assert(splash:wait(0.5))
-                local png_0 = splash:png()
+                pngTable['0'] = splash:png()
 
                 -- Select NEXT button and click it with
                 splash:select('#pform\\\\:validateDeaNumberButton'):mouse_click()
                 assert(splash:wait(5))
-                local png_1 = splash:png()
+                pngTable['1'] = splash:png()
 
                 -- Focus input field and fill it with dea number
                 focus('#csa_lastName')
@@ -52,7 +54,7 @@ class DEASpider(scrapy.Spider):
                 
 
                 assert(splash:wait(5))
-                local png_2 = splash:png()
+                pngTable['2'] = splash:png()
 
 
                 local entries = splash:history()
@@ -62,9 +64,7 @@ class DEASpider(scrapy.Spider):
                     html = splash:html(),
                     cookies = splash:get_cookies(),
                     headers = last_response.headers,
-                    png_0 = png_0,
-                    png_1 = png_1,
-                    png_2 = png_2,
+                    png_dict = pngTable,
                     }
             end"""
 
@@ -91,13 +91,10 @@ class DEASpider(scrapy.Spider):
         self.logger.info(f'COOKIES in start_request response: {cookies}')
         self.logger.info(f'HEADERS in start_request response: {headers}')
 
-        png_list = [
-            response.data['png_0'],
-            response.data['png_1'],
-            response.data['png_2'],
-        ]
+        png_dict = response.data['png_dict']
 
-        for i, png in enumerate(png_list):
+        for i, png in png_dict.items():
+            i = int(i)
             self.logger.info(f'GENERATING start_request response png_{i:02d}')
             imgdata = base64.b64decode(png)
             filename = f'./img/dea_{i:02d}.png'
