@@ -65,16 +65,27 @@ class DEASpider(scrapy.Spider):
                 --
                 -- login_2 -- DATE OF BIRTH
                 --
+                -- HOVER validate dob button
+                assert(splash:select('button[type=submit]'))
+                splash:select('button[type=submit]'):mouse_hover()
+                assert(splash:wait(0.5))
+                pngTable['2'] = splash:png()
                 -- Focus input field and fill it with dea number
                 assert(splash:select('input[type=text]'))
                 focus('input[type=text]')
                 splash:send_text('04/27/1988')   -- <========== DATE OF BIRTH
                 assert(splash:wait(1))
+                pngTable['3'] = splash:png()
                 -- intermedian click to make calendar dissapear
                 assert(splash:select('table'))
                 splash:select('table'):mouse_click()
                 assert(splash:wait(0.2))
-                pngTable['2'] = splash:png()
+                pngTable['4'] = splash:png()
+                -- HOVER validate dob button
+                assert(splash:select('button[type=submit]'))
+                splash:select('button[type=submit]'):mouse_hover()
+                assert(splash:wait(1))
+                pngTable['5'] = splash:png()
 
 
                 
