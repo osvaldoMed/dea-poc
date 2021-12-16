@@ -90,13 +90,28 @@ class DEASpider(scrapy.Spider):
                 splash:select('button[type=submit]'):mouse_hover()
                 assert(splash:wait(1))
                 pngTable['5'] = splash:png()
-
+                -- CLICK validate dob button
                 splash:select('button[type=submit]'):mouse_click()
                 assert(splash:wait(5))
                 pngTable['6'] = splash:png()
 
-
-                
+                --
+                -- login_3 -- checkmark
+                -- 
+                -- CLICK checkmark box
+                assert(splash:select('span.ui-c'))
+                splash:select('span.ui-c'):mouse_click()
+                assert(splash:wait(0.5))
+                pngTable['7'] = splash:png()
+                -- intermedian click to make next possible
+                assert(splash:select('legend'))
+                splash:select('table'):mouse_click()
+                assert(splash:wait(0.2))
+                pngTable['8'] = splash:png()
+                -- CLICK next button
+                splash:select('button[type=submit]'):mouse_click()
+                assert(splash:wait(5))
+                pngTable['9'] = splash:png()
 
 
                 local entries = splash:history()
