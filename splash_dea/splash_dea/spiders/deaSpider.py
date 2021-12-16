@@ -81,6 +81,10 @@ class DEASpider(scrapy.Spider):
                 splash:select('table'):mouse_click()
                 assert(splash:wait(0.2))
                 pngTable['4'] = splash:png()
+                -- SECOND intermedian click to make validate button clickable
+                splash:select('table'):mouse_click()
+                assert(splash:wait(0.2))
+                pngTable['4'] = splash:png()
                 -- HOVER validate dob button
                 assert(splash:select('button[type=submit]'))
                 splash:select('button[type=submit]'):mouse_hover()
