@@ -24,17 +24,21 @@ class DEASpider(scrapy.Spider):
                 assert(splash:go(args.url))
                 assert(splash:wait(1))
 
-                -- Focus input field and fill it with dea number
+                --
+                -- login_0 -- DEA NUMBER
+                --
                 focus('#pform\\\\:deaNumber')
                 splash:send_text('FE9093028')   -- <========== DEA NUMBER
                 assert(splash:wait(0))
                 pngTable['0'] = splash:png()
-
-                -- Select NEXT button and click it with
+                -- Click next 
                 splash:select('#pform\\\\:validateDeaNumberButton'):mouse_click()
                 assert(splash:wait(5))
-                pngTable['1'] = splash:png()
 
+
+                --
+                -- login_1 -- PERSONAL DATA
+                --
                 -- Focus input field and fill it with dea number
                 focus('#csa_lastName')
                 splash:send_text('Estler')   -- <========== LAST NAME
@@ -51,21 +55,27 @@ class DEASpider(scrapy.Spider):
                 focus('#csa_expYear')
                 splash:send_text('2022')   -- <========== EXP YEAR
                 assert(splash:wait(1))
-                pngTable['2'] = splash:png()
+                pngTable['1'] = splash:png()
 
                 -- Select LOGIN button and click it
                 assert(splash:select('input[type=submit]'))
                 splash:select('input[type=submit]'):mouse_click()
                 assert(splash:wait(10))
-                pngTable['3'] = splash:png()
 
-
+                --
+                -- login_2 -- DATE OF BIRTH
+                --
                 -- Focus input field and fill it with dea number
                 assert(splash:select('input[type=text]'))
                 focus('input[type=text]')
                 splash:send_text('04/27/1988')   -- <========== DATE OF BIRTH
                 assert(splash:wait(1))
-                pngTable['4'] = splash:png()
+                -- intermedian click to make calendar dissapear
+                assert(splash:select('table'))
+                splash:select('table'):mouse_click()
+                assert(splash:wait(0.2))
+                pngTable['2'] = splash:png()
+
 
                 
 
