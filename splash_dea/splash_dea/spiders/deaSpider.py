@@ -18,6 +18,10 @@ class DEASpider(scrapy.Spider):
                     splash:select(sel):focus()
                 end
 
+                function wait_for_element(sel)
+                    splash:select(sel):focus()
+                end
+
                 pngTable = {}
 
                 -- Go to DEA website and wait to load
@@ -65,32 +69,32 @@ class DEASpider(scrapy.Spider):
                 --
                 -- login_2 -- DATE OF BIRTH
                 --
-                -- HOVER validate dob button
+                -- ==HOVER validate dob button
                 assert(splash:select('button[type=submit]'))
                 splash:select('button[type=submit]'):mouse_hover()
                 assert(splash:wait(0.5))
                 pngTable['2'] = splash:png()
-                -- Focus input field and fill it with dea number
+                -- ==Focus input field and fill it with dea number
                 assert(splash:select('input[type=text]'))
                 focus('input[type=text]')
-                splash:send_text('04/27/1988')   -- <========== DATE OF BIRTH
+                splash:send_text('04/27/1988')   -- <============== DATE OF BIRTH
                 assert(splash:wait(1))
                 pngTable['3'] = splash:png()
-                -- intermedian click to make calendar dissapear
+                -- ==intermedian click to make calendar dissapear
                 assert(splash:select('table'))
                 splash:select('table'):mouse_click()
                 assert(splash:wait(0.2))
                 pngTable['4'] = splash:png()
-                -- SECOND intermedian click to make validate button clickable
+                -- ==SECOND intermedian click to make validate button clickable
                 splash:select('table'):mouse_click()
                 assert(splash:wait(0.2))
                 pngTable['4'] = splash:png()
-                -- HOVER validate dob button
+                -- ==HOVER validate dob button
                 assert(splash:select('button[type=submit]'))
                 splash:select('button[type=submit]'):mouse_hover()
                 assert(splash:wait(1))
                 pngTable['5'] = splash:png()
-                -- CLICK validate dob button
+                -- ==CLICK validate dob button
                 splash:select('button[type=submit]'):mouse_click()
                 assert(splash:wait(5))
                 pngTable['6'] = splash:png()
@@ -112,6 +116,29 @@ class DEASpider(scrapy.Spider):
                 splash:select('button[type=submit]'):mouse_click()
                 assert(splash:wait(5))
                 pngTable['9'] = splash:png()
+
+                --
+                -- login_4 -- DEA NUMBER AGAIN
+                --
+                assert(splash:select('#validationForm\\\\:deaNumber'))
+                focus('#validationForm\\\\:deaNumber')
+                splash:send_text('FE9093028')   -- <========== DEA NUMBER
+                assert(splash:wait(0))
+                pngTable['10'] = splash:png()
+                -- Click next 
+                assert(splash:select('#validationForm\\\\:proceed'))
+                splash:select('#validationForm\\\\:proceed'):mouse_click()
+                assert(splash:wait(5))
+                pngTable['11'] = splash:png()
+
+                --
+                -- DOWNLOAD file
+                --
+                -- HOVER over download button
+                assert(splash:select('#validationForm\\\\:j_idt95'))
+                splash:select('#validationForm\\\\:j_idt95'):mouse_hover()
+                assert(splash:wait(1))
+                pngTable['12'] = splash:png()
 
 
                 local entries = splash:history()
