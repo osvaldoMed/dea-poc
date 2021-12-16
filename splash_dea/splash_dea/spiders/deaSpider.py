@@ -21,24 +21,38 @@ class DEASpider(scrapy.Spider):
                 -- Go to DEA website and wait to load
                 assert(splash:go(args.url))
                 assert(splash:wait(1))
-                local png_0 = splash:png()
-
-                -- Make sure input is available and hover mouse over it
-                local deaNumberInput = assert(splash:select('#pform\\\\:deaNumber'))
-                ok, reason = deaNumberInput:mouse_hover()
-                assert(splash:wait(0.5))
-                local png_1 = splash:png()
 
                 -- Focus input field and fill it with dea number
                 focus('#pform\\\\:deaNumber')
-                splash:send_text(splash.args.deaNumber)
+                splash:send_text('FE9093028')   -- <========== DEA NUMBER
                 assert(splash:wait(0.5))
-                local png_2 = splash:png()
+                local png_0 = splash:png()
 
                 -- Select NEXT button and click it with
                 splash:select('#pform\\\\:validateDeaNumberButton'):mouse_click()
                 assert(splash:wait(5))
-                local png_3 = splash:png()
+                local png_1 = splash:png()
+
+                -- Focus input field and fill it with dea number
+                focus('#csa_lastName')
+                splash:send_text('Estler')   -- <========== DEA NUMBER
+                assert(splash:wait(1))
+                focus('#csa_ssn')
+                splash:send_text('628225151')   -- <========== DEA NUMBER
+                assert(splash:wait(1))
+                focus('#csa_zip')
+                splash:send_text('78749')   -- <========== DEA NUMBER
+                assert(splash:wait(1))
+                focus('#csa_expMonth')
+                splash:send_text('08')   -- <========== DEA NUMBER
+                assert(splash:wait(1))
+                focus('#csa_expYear')
+                splash:send_text('2022')   -- <========== DEA NUMBER
+                assert(splash:wait(1))
+                
+
+                assert(splash:wait(5))
+                local png_2 = splash:png()
 
 
                 local entries = splash:history()
@@ -51,7 +65,6 @@ class DEASpider(scrapy.Spider):
                     png_0 = png_0,
                     png_1 = png_1,
                     png_2 = png_2,
-                    png_3 = png_3,
                     }
             end"""
 
@@ -82,7 +95,6 @@ class DEASpider(scrapy.Spider):
             response.data['png_0'],
             response.data['png_1'],
             response.data['png_2'],
-            response.data['png_3']
         ]
 
         for i, png in enumerate(png_list):
