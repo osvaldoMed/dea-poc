@@ -36,4 +36,4 @@ Open Notebook at selenium-dea and execute cell by cell. Note, you have to wait f
 ## Scrapy-Splash implementation.
 
 We need to run a docker container with the splash server
-> docker run -p 8050:8050 scrapinghub/splash --max-timeout 200
+> docker run -p 8050:8050 scrapinghub/splash --max-timeout 3600
