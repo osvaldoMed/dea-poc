@@ -144,10 +144,10 @@ class DEASpider(scrapy.Spider):
         return [request]
 
     def login_1(self, response):
-        #### HANDLE cookies, headers and screenshots
         self.logger.info(f'RECEIVED start_request response')
+        self.logger.info(f'RESPONSE URL = {response.url}')
 
-
+        #### HANDLE cookies, headers and screenshots
         cookie_list = response.data['cookies']
         self.logger.info(f'COOKIES in start_request response:')
         for cookie in cookie_list:
@@ -170,5 +170,51 @@ class DEASpider(scrapy.Spider):
             with open(filename, 'wb') as f:
                 f.write(imgdata)
             self.logger.info(f'SAVED screenshot {filename}')
+
+        formdata = {
+            'validationForm': 'validationForm',
+            'validationForm:deaNumber': 'FE9093028',
+            'validationForm:j_idt95': '',
+            'javax.faces.ViewState': 'e1s4',
+        }
+
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36',
+            'Referer': 'https://apps.deadiversion.usdoj.gov/webforms2/spring/main?execution=e1s4',
+        }
+
+        download_url = 'https://apps.deadiversion.usdoj.gov/webforms2/spring/main?execution=e1s4'
+        request = FormRequest(
+            url=download_url,
+            callback= self.manage_pdf,
+            formdata=formdata,
+            method='POST',
+            headers=headers,
+            cookies=cookie_list,
+        )
+
+        self.logger.info(f'>>>>>>>>>> SENDING PDF REQUEST <<<<<<<<<<<')
+        self.logger.info(f'========== REQUEST COOKIES ============')
+        for cookie in request.cookies:
+            msg = f"=== name:{cookie['name']}; value:{cookie['value']},"
+            self.logger.info(msg)
+
+        self.logger.info(f'========== REQUEST HEADERS ============')
+        for name, value in request.headers.items():
+            msg = f"=== name:{name}; value:{value},"
+            self.logger.info(msg)
+        self.logger.info(f'>>>>>>>>>> SENDING PDF REQUEST <<<<<<<<<<<')
+        return request
+
+    def manage_pdf(self, response):
+        self.logger.info(f'<<<<<<<<<< RECEIVED PDF RESPONSE >>>>>>>>>')
+        self.logger.info(f'========== RESPONSE HEADERS ============')
+        for name, value in response.headers.items():
+            msg = f"=== name:{name}; value:{value},"
+            self.logger.info(msg)
+
+        return
+
+
 
 
