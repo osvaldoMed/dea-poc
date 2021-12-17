@@ -18,31 +18,27 @@ class DEASpider(scrapy.Spider):
                     splash:select(sel):focus()
                 end
 
-                function wait_for_element(sel)
-                    splash:select(sel):focus()
-                end
-
                 pngTable = {}
 
                 -- Go to DEA website and wait to load
                 assert(splash:go(args.url))
                 assert(splash:wait(1))
 
-                --
-                -- login_0 -- DEA NUMBER
-                --
+                -----------------------------
+                -- login_0 -- DEA NUMBER-----
+                -----------------------------
                 focus('#pform\\\\:deaNumber')
                 splash:send_text('FE9093028')   -- <========== DEA NUMBER
                 assert(splash:wait(0))
-                pngTable['0'] = splash:png()
+                pngTable['0'] = splash:png()   -- <=================== SCREENSHOT
                 -- Click next 
                 splash:select('#pform\\\\:validateDeaNumberButton'):mouse_click()
-                assert(splash:wait(5))
+                assert(splash:wait(10))
 
 
-                --
-                -- login_1 -- PERSONAL DATA
-                --
+                --------------------------------
+                -- login_1 -- PERSONAL DATA-----
+                --------------------------------
                 -- Focus input field and fill it with dea number
                 focus('#csa_lastName')
                 splash:send_text('Estler')   -- <========== LAST NAME
@@ -59,87 +55,70 @@ class DEASpider(scrapy.Spider):
                 focus('#csa_expYear')
                 splash:send_text('2022')   -- <========== EXP YEAR
                 assert(splash:wait(1))
-                pngTable['1'] = splash:png()
+                pngTable['1'] = splash:png()   -- <=================== SCREENSHOT
 
                 -- Select LOGIN button and click it
                 assert(splash:select('input[type=submit]'))
                 splash:select('input[type=submit]'):mouse_click()
                 assert(splash:wait(10))
 
-                --
-                -- login_2 -- DATE OF BIRTH
-                --
-                -- ==HOVER validate dob button
-                assert(splash:select('button[type=submit]'))
-                splash:select('button[type=submit]'):mouse_hover()
-                assert(splash:wait(0.5))
-                pngTable['2'] = splash:png()
+                -------------------------------
+                -- login_2 -- DATE OF BIRTH----
+                -------------------------------
                 -- ==Focus input field and fill it with dea number
                 assert(splash:select('input[type=text]'))
                 focus('input[type=text]')
                 splash:send_text('04/27/1988')   -- <============== DATE OF BIRTH
                 assert(splash:wait(1))
-                pngTable['3'] = splash:png()
                 -- ==intermedian click to make calendar dissapear
                 assert(splash:select('table'))
                 splash:select('table'):mouse_click()
                 assert(splash:wait(0.2))
-                pngTable['4'] = splash:png()
                 -- ==SECOND intermedian click to make validate button clickable
                 splash:select('table'):mouse_click()
                 assert(splash:wait(0.2))
-                pngTable['4'] = splash:png()
-                -- ==HOVER validate dob button
-                assert(splash:select('button[type=submit]'))
-                splash:select('button[type=submit]'):mouse_hover()
-                assert(splash:wait(1))
-                pngTable['5'] = splash:png()
+                pngTable['2'] = splash:png()   -- <=================== SCREENSHOT
                 -- ==CLICK validate dob button
                 splash:select('button[type=submit]'):mouse_click()
-                assert(splash:wait(5))
-                pngTable['6'] = splash:png()
+                assert(splash:wait(10))
 
-                --
-                -- login_3 -- checkmark
-                -- 
+                --------------------------
+                -- login_3 -- checkmark---
+                --------------------------
                 -- CLICK checkmark box
                 assert(splash:select('span.ui-c'))
                 splash:select('span.ui-c'):mouse_click()
                 assert(splash:wait(0.5))
-                pngTable['7'] = splash:png()
                 -- intermedian click to make next possible
                 assert(splash:select('legend'))
                 splash:select('table'):mouse_click()
                 assert(splash:wait(0.2))
-                pngTable['8'] = splash:png()
+                pngTable['3'] = splash:png()   -- <=================== SCREENSHOT
                 -- CLICK next button
                 splash:select('button[type=submit]'):mouse_click()
-                assert(splash:wait(5))
-                pngTable['9'] = splash:png()
+                assert(splash:wait(10))
 
-                --
-                -- login_4 -- DEA NUMBER AGAIN
-                --
+                ----------------------------------
+                -- login_4 -- DEA NUMBER AGAIN----
+                ----------------------------------
                 assert(splash:select('#validationForm\\\\:deaNumber'))
                 focus('#validationForm\\\\:deaNumber')
                 splash:send_text('FE9093028')   -- <========== DEA NUMBER
                 assert(splash:wait(0))
-                pngTable['10'] = splash:png()
+                pngTable['4'] = splash:png()   -- <=================== SCREENSHOT
                 -- Click next 
                 assert(splash:select('#validationForm\\\\:proceed'))
                 splash:select('#validationForm\\\\:proceed'):mouse_click()
-                assert(splash:wait(5))
-                pngTable['11'] = splash:png()
+                assert(splash:wait(10))
 
-                --
-                -- DOWNLOAD file
-                --
-                -- HOVER over download button
-                assert(splash:select('#validationForm\\\\:j_idt95'))
-                splash:select('#validationForm\\\\:j_idt95'):mouse_hover()
+                ------------------------------------------
+                -- PROVIDERS DEA INFORMATION PAGE---------
+                ------------------------------------------
+                -- ==HOVER validate dob button
+                assert(splash:select('button[type=submit]'))
+                splash:select('button[type=submit]'):mouse_hover()
                 assert(splash:wait(1))
-                pngTable['12'] = splash:png()
-
+                pngTable['5'] = splash:png()   -- <=================== SCREENSHOT
 
                 local entries = splash:history()
                 local last_response = entries[#entries].response
@@ -161,29 +140,35 @@ class DEASpider(scrapy.Spider):
             session_id=1,
             args={'lua_source': script, 'timeout': 3600},
         )
-        self.logger.info(f'INITIAL REQUEST to {request.url}')
-        self.logger.info(f'INITIAL REQUEST HEADERS:  {request.headers}')
-        self.logger.info(f'INITIAL REQUEST splash args: {request.meta["splash"]}')
     
         return [request]
 
     def login_1(self, response):
-        cookies = response.data['cookies']
-        headers = response.data['headers']
-        html = response.data['html']
+        #### HANDLE cookies, headers and screenshots
         self.logger.info(f'RECEIVED start_request response')
-        self.logger.info(f'COOKIES in start_request response: {cookies}')
-        self.logger.info(f'HEADERS in start_request response: {headers}')
 
+
+        cookie_list = response.data['cookies']
+        self.logger.info(f'COOKIES in start_request response:')
+        for cookie in cookie_list:
+            msg = f"name:{cookie['name']}; value:{cookie['value']},"
+            self.logger.info(msg)
+
+        header_list = response.data['headers']
+        self.logger.info(f'HEADERS in start_request:')
+        for header in header_list:
+            msg = f"{header['name']}: {header['value']},"
+            self.logger.info(msg)
+
+        #### save screenshots
         png_dict = response.data['png_dict']
-
         for i, png in png_dict.items():
             i = int(i)
-            self.logger.info(f'GENERATING start_request response png_{i:02d}')
             imgdata = base64.b64decode(png)
             filename = f'./img/dea_{i:02d}.png'
 
             with open(filename, 'wb') as f:
                 f.write(imgdata)
+            self.logger.info(f'SAVED screenshot {filename}')
 
 
