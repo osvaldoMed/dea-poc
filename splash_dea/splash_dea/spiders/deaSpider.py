@@ -186,7 +186,7 @@ class DEASpider(scrapy.Spider):
         download_url = 'https://apps.deadiversion.usdoj.gov/webforms2/spring/main?execution=e1s4'
         request = FormRequest(
             url=download_url,
-            callback= self.manage_pdf,
+            callback= self.save_pdf,
             formdata=formdata,
             method='POST',
             headers=headers,
@@ -206,12 +206,17 @@ class DEASpider(scrapy.Spider):
         self.logger.info(f'>>>>>>>>>> SENDING PDF REQUEST <<<<<<<<<<<')
         return request
 
-    def manage_pdf(self, response):
+    def save_pdf(self, response):
         self.logger.info(f'<<<<<<<<<< RECEIVED PDF RESPONSE >>>>>>>>>')
         self.logger.info(f'========== RESPONSE HEADERS ============')
         for name, value in response.headers.items():
             msg = f"=== name:{name}; value:{value},"
             self.logger.info(msg)
+
+        pdf_filename = 'files/dea_verification.pdf'
+        with open(pdf_filename, 'wb') as f:
+            f.write(response.body)
+        self.logger.info(f'SAVED DEA VERIFICATION PDF {pdf_filename}')
 
         return
 
