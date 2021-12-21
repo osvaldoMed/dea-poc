@@ -205,8 +205,9 @@ class DEASpider(scrapy.Spider):
 
         # Save PDF to local Storage
         pdf_filename = 'files/dea_verification.pdf'
+        pdf_data = response.body
         with open(pdf_filename, 'wb') as f:
-            f.write(response.body)
+            f.write(pdf_data)
         self.logger.info(f'SAVED DEA VERIFICATION PDF {pdf_filename}')
 
         return
