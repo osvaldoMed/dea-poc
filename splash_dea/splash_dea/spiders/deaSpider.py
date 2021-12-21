@@ -21,6 +21,12 @@ class DEASpider(scrapy.Spider):
                     splash:select(sel):focus()
                 end
 
+                function send_text(sel, text)
+                    focus(sel)
+                    splash:send_text(text)
+                    splash:wait(1)
+                end
+
                 -- function to wait for element to be rendered and selectable on the page.
                 function wait_for_element(sel)
                     while not splash:select(sel) do
@@ -57,10 +63,13 @@ class DEASpider(scrapy.Spider):
                 ------------------------ login_1 -- PERSONAL DATA ------------------------
                 --------------------------------------------------------------------------
                 wait_for_element('#csa_lastName') -- <=========== Wait for (lastName input element)
-                -- Focus input field and fill it with dea number
-                focus('#csa_lastName')
-                splash:send_text('Estler')   -- <========== LAST NAME
-                assert(splash:wait(1))
+
+                send_text('#csa_lastName', 'Estler')-- <========== LAST NAME
+                --local lastName = splash:select('#csa_lastName')
+                --lastName:send_text('Estler')
+                --focus('#csa_lastName')
+                --splash:send_text('Estler')   
+                --assert(splash:wait(1))
                 focus('#csa_ssn')
                 splash:send_text('628225151')   -- <========== SSN
                 assert(splash:wait(1))
