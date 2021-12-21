@@ -16,13 +16,8 @@ class DEASpider(scrapy.Spider):
                 --------------------------------------------------------------------------
                 ------------------------ helper functions --------------------------------
                 --------------------------------------------------------------------------
-                -- function to select given element and focus it. accepts css selector
-                function focus(sel)
-                    splash:select(sel):focus()
-                end
-
                 function send_text(sel, text)
-                    focus(sel)
+                    splash:select(sel):focus()
                     splash:send_text(text)
                     assert(splash:wait(1))
                 end
@@ -209,7 +204,7 @@ class DEASpider(scrapy.Spider):
         with open(pdf_filename, 'wb') as f:
             f.write(pdf_data)
         self.logger.info(f'SAVED DEA VERIFICATION PDF {pdf_filename}')
-
+        
         return
 
 
