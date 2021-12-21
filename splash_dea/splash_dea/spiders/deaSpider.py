@@ -24,7 +24,7 @@ class DEASpider(scrapy.Spider):
                 function send_text(sel, text)
                     focus(sel)
                     splash:send_text(text)
-                    splash:wait(1)
+                    assert(splash:wait(1))
                 end
 
                 -- function to wait for element to be rendered and selectable on the page.
@@ -49,13 +49,10 @@ class DEASpider(scrapy.Spider):
 
                 wait_for_element('#pform\\\\:deaNumber') -- <=========== Wait for (deaNumber input element)
 
-                focus('#pform\\\\:deaNumber')
-                splash:send_text('FE9093028')   -- <==================== input DEA NUMBER
-                assert(splash:wait(0))
+                send_text('#pform\\\\:deaNumber', 'FE9093028')
 
                 pngTable['0'] = splash:png()   -- <===================== PNG SCREENSHOT
                 htmlTable['0'] = splash:html()   -- <=================== html SCREENSHOT
-
                 -- Click next 
                 splash:select('#pform\\\\:validateDeaNumberButton'):mouse_click()
 
@@ -63,29 +60,16 @@ class DEASpider(scrapy.Spider):
                 ------------------------ login_1 -- PERSONAL DATA ------------------------
                 --------------------------------------------------------------------------
                 wait_for_element('#csa_lastName') -- <=========== Wait for (lastName input element)
-
+                wait_for_element('input[type=submit]') -- <====== Wait for LOGIN button to appear
                 send_text('#csa_lastName', 'Estler')-- <========== LAST NAME
-                --local lastName = splash:select('#csa_lastName')
-                --lastName:send_text('Estler')
-                --focus('#csa_lastName')
-                --splash:send_text('Estler')   
-                --assert(splash:wait(1))
-                focus('#csa_ssn')
-                splash:send_text('628225151')   -- <========== SSN
-                assert(splash:wait(1))
-                focus('#csa_zip')
-                splash:send_text('78749')   -- <========== ZIP CODE
-                assert(splash:wait(1))
-                focus('#csa_expMonth')
-                splash:send_text('08')   -- <========== EXP MONTH
-                assert(splash:wait(1))
-                focus('#csa_expYear')
-                splash:send_text('2022')   -- <========== EXP YEAR
-                assert(splash:wait(1))
+                send_text('#csa_ssn', '628225151')-- <========== SSN
+                send_text('#csa_zip', '78749')-- <========== ZIP
+                send_text('#csa_expMonth', '08')-- <========== EXP MONTH
+                send_text('#csa_expYear', '2022')-- <========== EXP YEAR
+
                 pngTable['1'] = splash:png()   -- <=================== SCREENSHOT
 
                 -- Select LOGIN button and click it
-                assert(splash:select('input[type=submit]'))
                 splash:select('input[type=submit]'):mouse_click()
                 assert(splash:wait(10))
 
