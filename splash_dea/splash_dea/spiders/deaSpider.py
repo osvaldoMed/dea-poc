@@ -87,29 +87,28 @@ class DEASpider(scrapy.Spider):
                 -- ==CLICK validate dob button
                 splash:select('#checkDob\\\\:validateDob'):mouse_click()
 
-                --------------------------
-                -- login_3 -- checkmark---
-                --------------------------
+                --------------------------------------------------------------------------
+                ------------------------ login_3 -- CHECKBOX -----------------------------
+                --------------------------------------------------------------------------
                 wait_for_element('#ackForm\\\\:acknowledgementCheckbox_input')
                 -- CLICK checkmark box
                 assert(splash:select('#ackForm\\\\:acknowledgementCheckbox_input'))
                 splash:select('span.ui-c'):mouse_click()
                 assert(splash:wait(0.5))
                 -- intermedian click to make next possible
-                assert(splash:select('legend'))
+                assert(splash:select('table'))
                 splash:select('table'):mouse_click()
-                assert(splash:wait(0.2))
+                assert(splash:wait(0))
                 pngTable['3'] = splash:png()   -- <=================== SCREENSHOT
                 -- CLICK next button
                 splash:select('button[type=submit]'):mouse_click()
 
-                ----------------------------------
-                -- login_4 -- DEA NUMBER AGAIN----
-                ----------------------------------
+                --------------------------------------------------------------------------
+                ------------------------ login_4 -- DEA NUMBER AGAIN ---------------------
+                --------------------------------------------------------------------------
                 wait_for_element('#validationForm\\\\:deaNumber')
                 wait_for_element('#validationForm\\\\:proceed')
 
-                assert(splash:select('#validationForm\\\\:deaNumber'))
                 send_text('#validationForm\\\\:deaNumber', 'FE9093028')
 
                 pngTable['4'] = splash:png()   -- <=================== SCREENSHOT
@@ -118,13 +117,10 @@ class DEASpider(scrapy.Spider):
                 splash:select('#validationForm\\\\:proceed'):mouse_click()
                 assert(splash:wait(10))
 
-                ------------------------------------------
-                -- PROVIDERS DEA INFORMATION PAGE---------
-                ------------------------------------------
-                -- ==HOVER validate dob button
-                assert(splash:select('button[type=submit]'))
-                splash:select('button[type=submit]'):mouse_hover()
-                assert(splash:wait(1))
+                --------------------------------------------------------------------------
+                ------------------- PROVIDERS DEA INFORMATION PAGE -----------------------
+                --------------------------------------------------------------------------
+                wait_for_element('#validationForm\\\\:j_idt26')
                 pngTable['5'] = splash:png()   -- <=================== SCREENSHOT
 
                 local entries = splash:history()
