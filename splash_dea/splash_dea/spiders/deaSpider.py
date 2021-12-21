@@ -86,13 +86,13 @@ class DEASpider(scrapy.Spider):
                 pngTable['2'] = splash:png()   -- <=================== SCREENSHOT
                 -- ==CLICK validate dob button
                 splash:select('#checkDob\\\\:validateDob'):mouse_click()
-                assert(splash:wait(10))
 
                 --------------------------
                 -- login_3 -- checkmark---
                 --------------------------
+                wait_for_element('#ackForm\\\\:acknowledgementCheckbox_input')
                 -- CLICK checkmark box
-                assert(splash:select('span.ui-c'))
+                assert(splash:select('#ackForm\\\\:acknowledgementCheckbox_input'))
                 splash:select('span.ui-c'):mouse_click()
                 assert(splash:wait(0.5))
                 -- intermedian click to make next possible
@@ -102,18 +102,19 @@ class DEASpider(scrapy.Spider):
                 pngTable['3'] = splash:png()   -- <=================== SCREENSHOT
                 -- CLICK next button
                 splash:select('button[type=submit]'):mouse_click()
-                assert(splash:wait(10))
 
                 ----------------------------------
                 -- login_4 -- DEA NUMBER AGAIN----
                 ----------------------------------
+                wait_for_element('#validationForm\\\\:deaNumber')
+                wait_for_element('#validationForm\\\\:proceed')
+
                 assert(splash:select('#validationForm\\\\:deaNumber'))
-                focus('#validationForm\\\\:deaNumber')
-                splash:send_text('FE9093028')   -- <========== DEA NUMBER
-                assert(splash:wait(0))
+                send_text('#validationForm\\\\:deaNumber', 'FE9093028')
+
                 pngTable['4'] = splash:png()   -- <=================== SCREENSHOT
+
                 -- Click next 
-                assert(splash:select('#validationForm\\\\:proceed'))
                 splash:select('#validationForm\\\\:proceed'):mouse_click()
                 assert(splash:wait(10))
 
