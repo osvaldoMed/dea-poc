@@ -13,32 +13,50 @@ class DEASpider(scrapy.Spider):
     def start_requests(self):
         script = """
             function main(splash, args)
+                --------------------------------------------------------------------------
+                ------------------------ helper functions --------------------------------
+                --------------------------------------------------------------------------
                 -- function to select given element and focus it. accepts css selector
                 function focus(sel)
                     splash:select(sel):focus()
                 end
 
+                -- function to wait for element to be rendered and selectable on the page.
+                function wait_for_element(sel)
+                    while not splash:select(sel) do
+                        splash:wait(0.1)
+                    end
+                end
+                --------------------------------------------------------------------------
+
                 pngTable = {}
+                htmlTable = {}
 
-                -- Go to DEA website and wait to load
+                --------------------------------------------------------------------------
+                ------------------------ GO to DEA website -------------------------------
+                --------------------------------------------------------------------------
                 assert(splash:go(args.url))
-                assert(splash:wait(1))
 
-                -----------------------------
-                -- login_0 -- DEA NUMBER-----
-                -----------------------------
+                --------------------------------------------------------------------------
+                ------------------------ login_0 -- DEA NUMBER----------------------------
+                --------------------------------------------------------------------------
+
+                wait_for_element('#pform\\\\:deaNumber') -- <=========== Wait for (deaNumber input element)
+
                 focus('#pform\\\\:deaNumber')
-                splash:send_text('FE9093028')   -- <========== DEA NUMBER
+                splash:send_text('FE9093028')   -- <==================== input DEA NUMBER
                 assert(splash:wait(0))
-                pngTable['0'] = splash:png()   -- <=================== SCREENSHOT
+
+                pngTable['0'] = splash:png()   -- <===================== PNG SCREENSHOT
+                htmlTable['0'] = splash:html()   -- <=================== html SCREENSHOT
+
                 -- Click next 
                 splash:select('#pform\\\\:validateDeaNumberButton'):mouse_click()
-                assert(splash:wait(10))
 
-
-                --------------------------------
-                -- login_1 -- PERSONAL DATA-----
-                --------------------------------
+                --------------------------------------------------------------------------
+                ------------------------ login_1 -- PERSONAL DATA ------------------------
+                --------------------------------------------------------------------------
+                wait_for_element('#csa_lastName') -- <=========== Wait for (lastName input element)
                 -- Focus input field and fill it with dea number
                 focus('#csa_lastName')
                 splash:send_text('Estler')   -- <========== LAST NAME
