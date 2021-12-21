@@ -68,29 +68,24 @@ class DEASpider(scrapy.Spider):
                 send_text('#csa_expYear', '2022')-- <========== EXP YEAR
 
                 pngTable['1'] = splash:png()   -- <=================== SCREENSHOT
-
                 -- Select LOGIN button and click it
                 splash:select('input[type=submit]'):mouse_click()
-                assert(splash:wait(10))
 
-                -------------------------------
-                -- login_2 -- DATE OF BIRTH----
-                -------------------------------
-                -- ==Focus input field and fill it with dea number
-                assert(splash:select('input[type=text]'))
-                focus('input[type=text]')
-                splash:send_text('04/27/1988')   -- <============== DATE OF BIRTH
-                assert(splash:wait(1))
-                -- ==intermedian click to make calendar dissapear
-                assert(splash:select('table'))
-                splash:select('table'):mouse_click()
-                assert(splash:wait(0.2))
-                -- ==SECOND intermedian click to make validate button clickable
-                splash:select('table'):mouse_click()
-                assert(splash:wait(0.2))
+                --------------------------------------------------------------------------
+                ------------------------ login_2 -- DATE OF BIRTH ------------------------
+                --------------------------------------------------------------------------
+                wait_for_element('#checkDob\\\\:dobCal_input') -- <== wait for DOB field
+                wait_for_element('table') -- <== wait for table element
+                wait_for_element('#checkDob\\\\:validateDob') --<==== wait for DOB button
+
+                send_text('#checkDob\\\\:dobCal_input','04/27/1988')
+                
+                splash:select('table'):mouse_click() -- <==== Intermedian click
+                splash:select('table'):mouse_click() -- <==== Second intermedian click
+
                 pngTable['2'] = splash:png()   -- <=================== SCREENSHOT
                 -- ==CLICK validate dob button
-                splash:select('button[type=submit]'):mouse_click()
+                splash:select('#checkDob\\\\:validateDob'):mouse_click()
                 assert(splash:wait(10))
 
                 --------------------------
@@ -160,16 +155,6 @@ class DEASpider(scrapy.Spider):
 
         #### HANDLE cookies, headers and screenshots
         cookie_list = response.data['cookies']
-        self.logger.info(f'COOKIES in start_request response:')
-        for cookie in cookie_list:
-            msg = f"name:{cookie['name']}; value:{cookie['value']},"
-            self.logger.info(msg)
-
-        header_list = response.data['headers']
-        self.logger.info(f'HEADERS in start_request:')
-        for header in header_list:
-            msg = f"{header['name']}: {header['value']},"
-            self.logger.info(msg)
 
         #### save screenshots
         png_dict = response.data['png_dict']
@@ -204,25 +189,10 @@ class DEASpider(scrapy.Spider):
             cookies=cookie_list,
         )
 
-        self.logger.info(f'>>>>>>>>>> SENDING PDF REQUEST <<<<<<<<<<<')
-        self.logger.info(f'========== REQUEST COOKIES ============')
-        for cookie in request.cookies:
-            msg = f"=== name:{cookie['name']}; value:{cookie['value']},"
-            self.logger.info(msg)
-
-        self.logger.info(f'========== REQUEST HEADERS ============')
-        for name, value in request.headers.items():
-            msg = f"=== name:{name}; value:{value},"
-            self.logger.info(msg)
-        self.logger.info(f'>>>>>>>>>> SENDING PDF REQUEST <<<<<<<<<<<')
         return request
 
     def save_pdf(self, response):
         self.logger.info(f'<<<<<<<<<< RECEIVED PDF RESPONSE >>>>>>>>>')
-        self.logger.info(f'========== RESPONSE HEADERS ============')
-        for name, value in response.headers.items():
-            msg = f"=== name:{name}; value:{value},"
-            self.logger.info(msg)
 
         pdf_filename = 'files/dea_verification.pdf'
         with open(pdf_filename, 'wb') as f:
