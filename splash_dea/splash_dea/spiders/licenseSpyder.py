@@ -6,11 +6,14 @@ from scrapy.http import FormRequest
 from scrapy.utils.response import open_in_browser
 
 
-class DEASpider(scrapy.Spider):
-    name = 'dea'
+class LicenseSpider(scrapy.Spider):
+    name = 'license'
     user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36'
 
+
     def start_requests(self):
+        init_url = 'https://apps.deadiversion.usdoj.gov/webforms2/spring/dupeCertLogin'
+
         script = """
             function main(splash, args)
                 --------------------------------------------------------------------------
@@ -84,43 +87,12 @@ class DEASpider(scrapy.Spider):
                 splash:select('#checkDob\\\\:validateDob'):mouse_click()
 
                 --------------------------------------------------------------------------
-                ------------------------ login_3 -- CHECKBOX -----------------------------
+                ------------------------ Arrived to Print Certificate Page ---------------
                 --------------------------------------------------------------------------
-                wait_for_element('#ackForm\\\\:acknowledgementCheckbox_input')
-                -- CLICK checkmark box
-                assert(splash:select('#ackForm\\\\:acknowledgementCheckbox_input'))
-                splash:select('span.ui-c'):mouse_click()
-                assert(splash:wait(0.5))
-                -- intermedian click to make next possible
-                assert(splash:select('table'))
-                splash:select('table'):mouse_click()
-                assert(splash:wait(0))
+                wait_for_element('#printCertForm\\\\:printCertButton')
                 pngTable['3'] = splash:png()   -- <===================== PNG SCREENSHOT
                 htmlTable['3'] = splash:html()   -- <=================== HTML SCREENSHOT
-                -- CLICK next button
-                splash:select('button[type=submit]'):mouse_click()
 
-                --------------------------------------------------------------------------
-                ------------------------ login_4 -- DEA NUMBER AGAIN ---------------------
-                --------------------------------------------------------------------------
-                wait_for_element('#validationForm\\\\:deaNumber')
-                wait_for_element('#validationForm\\\\:proceed')
-
-                send_text('#validationForm\\\\:deaNumber', 'FE9093028')
-
-                pngTable['4'] = splash:png()   -- <===================== PNG SCREENSHOT
-                htmlTable['4'] = splash:html()   -- <=================== HTML SCREENSHOT
-
-                -- Click next 
-                splash:select('#validationForm\\\\:proceed'):mouse_click()
-                assert(splash:wait(10))
-
-                --------------------------------------------------------------------------
-                ------------------- PROVIDERS DEA INFORMATION PAGE -----------------------
-                --------------------------------------------------------------------------
-                wait_for_element('#validationForm\\\\:j_idt26')
-                pngTable['5'] = splash:png()   -- <===================== PNG SCREENSHOT
-                htmlTable['5'] = splash:html()   -- <=================== HTML SCREENSHOT
 
                 local entries = splash:history()
                 local last_response = entries[#entries].response
@@ -134,10 +106,9 @@ class DEASpider(scrapy.Spider):
                     }
             end"""
 
-        url = 'https://apps.deadiversion.usdoj.gov/webforms2/spring/validationLogin'
 
         request = SplashRequest(
-            url=url,
+            url=init_url,
             callback=self.login_1,
             endpoint='execute',
             session_id=1,
@@ -148,13 +119,15 @@ class DEASpider(scrapy.Spider):
 
     def login_1(self, response):
         self.logger.info(f'RECEIVED SPLASH RESPONSE')
+        save_dir = 'license_results'
+        save_name = 'license'
 
         #### save png screenshots
         png_dict = response.data['png_dict']
         for i, png in png_dict.items():
             i = int(i)
             imgdata = base64.b64decode(png)
-            filename = f'./img/dea_{i:02d}.png'
+            filename = f'./{save_dir}/img/{save_name}_{i:02d}.png'
 
             with open(filename, 'wb') as f:
                 f.write(imgdata)
@@ -164,24 +137,23 @@ class DEASpider(scrapy.Spider):
         html_dict = response.data['html_dict']
         for i, html in html_dict.items():
             i = int(i)
-            filename = f'./html/dea_{i:02d}.html'
+            filename = f'./{save_dir}/html/{save_name}_{i:02d}.html'
 
             with open(filename, 'wt') as f:
                 f.write(html)
             self.logger.info(f'SAVED HTML {i:02d} to: {filename}')
 
         #### BUILD last post request to get PDF file
-        download_url = 'https://apps.deadiversion.usdoj.gov/webforms2/spring/main?execution=e1s4'
+        download_url = 'https://apps.deadiversion.usdoj.gov/webforms2/spring/main?execution=e1s2'
         cookie_list = response.data['cookies']
         formdata = {
-            'validationForm': 'validationForm',
-            'validationForm:deaNumber': 'FE9093028',
-            'validationForm:j_idt95': '',
-            'javax.faces.ViewState': 'e1s4',
+            'printCertForm': 'printCertForm',
+            'printCertForm:printCertButton': '',
+            'javax.faces.ViewState': 'e1s2',
         }
         headers = {
             'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36',
-            'Referer': 'https://apps.deadiversion.usdoj.gov/webforms2/spring/main?execution=e1s4',
+            'Referer': 'https://apps.deadiversion.usdoj.gov/webforms2/spring/main?execution=e1s2',
         }
 
         request = FormRequest(
@@ -199,11 +171,11 @@ class DEASpider(scrapy.Spider):
         self.logger.info(f'<<<<<<<<<< RECEIVED PDF RESPONSE >>>>>>>>>')
 
         # Save PDF to local Storage
-        pdf_filename = 'files/dea_verification.pdf'
+        pdf_filename = './license_results/files/DEACert.pdf'
         pdf_data = response.body
         with open(pdf_filename, 'wb') as f:
             f.write(pdf_data)
-        self.logger.info(f'SAVED DEA VERIFICATION PDF {pdf_filename}')
+        self.logger.info(f'SAVED DEA Certificate PDF {pdf_filename}')
         
         return
 
