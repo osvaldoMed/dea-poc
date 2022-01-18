@@ -169,9 +169,11 @@ class LicenseSpider(scrapy.Spider):
 
     def save_pdf(self, response):
         self.logger.info(f'<<<<<<<<<< RECEIVED PDF RESPONSE >>>>>>>>>')
+        save_dir = 'license_results'
+        save_name = 'license'
 
         # Save PDF to local Storage
-        pdf_filename = './license_results/files/DEACert.pdf'
+        pdf_filename = f'./{save_dir}/files/{save_name}_file.pdf'
         pdf_data = response.body
         with open(pdf_filename, 'wb') as f:
             f.write(pdf_data)
